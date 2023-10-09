@@ -1,0 +1,39 @@
+name: Terraform Format Check and KICS Scan
+on:
+  pull_request:
+    paths:
+      - 'Modules/**'
+      - 'Resource usage/**'
+    types:
+      - opened
+      - synchronize
+jobs:
+  format-and-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+      - name: Check Terraform format
+        id: terraform-fmt
+        run: terraform fmt -check
+        continue-on-error: true  # Allow the workflow to continue even if formatting fails
+      - name: Install KICS
+        run: curl -sSfL https://get.kics.io | sh
+      - name: Copy .tfvars files
+        run: |
+          cp -r project-folder/*.tfvars module-folder/
+      - name: Run KICS Scan
+        id: kics-scan
+        run: kics scan -p module-folder/
+      - name: Delete .tfvars files
+        if: ${{ steps.kics-scan.outcome == 'success' }}
+        run: rm module-folder/*.tfvars
+      - name: Set PR status to "failure" on Terraform formatting failure
+        if: ${{ steps.terraform-fmt.outcome == 'failure' }}
+        run: |
+          echo "Terraform formatting check failed. Please format your Terraform code using 'terraform fmt' and push the changes."
+          exit 1
