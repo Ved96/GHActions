@@ -2,9 +2,9 @@ name: PR Workflow
 
 on:
   pull_request:
-    branches:
-      - testGA
-
+    paths:
+      - 'Modules/**'
+      - 'Resource_usage/**'
 
 jobs:
   tfvars-copy-scan:
