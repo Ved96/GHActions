@@ -18,6 +18,7 @@ jobs:
       - name: Install KICS
         run: curl -sSfL https://get.kics.io | sh
 
+<<<<<<< test
       # Step 2: Get a list of all changed folders in the PR
       - name: Get changed folders
         id: changed-folders
@@ -38,6 +39,19 @@ jobs:
       - name: Copy .tfvars files for changed modules
         run: |
           CHANGED_MODULES=(${{ steps.changed-modules-and-resource-usage.outputs.changed-modules }})
+=======
+      # Step 2: Get a list of changed modules in the PR
+      - name: Get changed modules
+        id: changed-modules
+        run: |
+          CHANGED_MODULES=($(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} | grep '^Modules/' | cut -d'/' -f 2 | uniq))
+          echo "::set-output name=changed-modules::${CHANGED_MODULES[@]}"
+
+      # Step 3: Copy .tfvars files for changed modules
+      - name: Copy .tfvars files
+        run: |
+          CHANGED_MODULES=(${{ steps.changed-modules.outputs.changed-modules }})
+>>>>>>> main
           if [ -n "$CHANGED_MODULES" ]; then
             for module in "${CHANGED_MODULES[@]}"; do
               echo "Copying .tfvars files for module: $module"
@@ -47,6 +61,7 @@ jobs:
             echo "No changed modules found in the PR."
           fi
 
+<<<<<<< test
       # Step 5: Check Terraform format on all changed folders
       - name: Check Terraform format
         run: |
@@ -70,3 +85,31 @@ jobs:
       - name: Display KICS results
         run: |
           cat myResults/results.json
+=======
+      # Step 4: Run KICS Scan for changed modules
+      - name: Run KICS Scan for changed modules
+        uses: actions/checkout@v3
+      - name: Run KICS Scan
+        run: |
+          CHANGED_MODULES=(${{ steps.changed-modules.outputs.changed-modules }})
+          if [ -n "$CHANGED_MODULES" ]; then
+            for module in "${CHANGED_MODULES[@]}"; do
+              echo "Scanning module: $module"
+              kics scan -p "Modules/$module" || exit 1
+            done
+          else
+            echo "No changed modules found in the PR."
+          fi
+
+      # Step 5: Check Terraform format on changed modules
+      - name: Check Terraform format on changed modules
+        run: |
+          CHANGED_MODULES=(${{ steps.changed-modules.outputs.changed-modules }})
+          if [ -n "$CHANGED_MODULES" ]; then
+            for module in "${CHANGED_MODULES[@]}"; do
+              echo "Checking Terraform format in module: $module"
+              terraform fmt -check "Modules/$module" || exit 1
+            done
+          else
+            echo "No changed modules found in the PR."
+          fi
