@@ -18,45 +18,50 @@ jobs:
       - name: Install KICS
         run: curl -sSfL https://get.kics.io | sh
 
-      # Step 2: Get a list of changed folders in the PR
-      - name: Get changed folders
-        id: changed-folders
+      # Step 2: Get a list of changed modules in the PR
+      - name: Get changed modules
+        id: changed-modules
         run: |
-          CHANGED_FOLDERS=($(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} | grep -E '^(Modules/|Resource usage/)' | cut -d'/' -f 2 | uniq))
-          echo "::set-output name=changed-folders::${CHANGED_FOLDERS[@]}"
+          CHANGED_MODULES=($(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} | grep '^Modules/' | cut -d'/' -f 2 | uniq))
+          echo "::set-output name=changed-modules::${CHANGED_MODULES[@]}"
 
-      # Step 3: Check KICS scan on changed folders
+      # Step 3: Copy .tfvars files for changed modules
+      - name: Copy .tfvars files
+        run: |
+          CHANGED_MODULES=(${{ steps.changed-modules.outputs.changed-modules }})
+          if [ -n "$CHANGED_MODULES" ]; then
+            for module in "${CHANGED_MODULES[@]}"; do
+              echo "Copying .tfvars files for module: $module"
+              cp "Resource usage/$module"/*.tfvars "Modules/$module"/
+            done
+          else
+            echo "No changed modules found in the PR."
+          fi
+
+      # Step 4: Run KICS Scan for changed modules
+      - name: Run KICS Scan for changed modules
+        uses: actions/checkout@v3
       - name: Run KICS Scan
-        id: kics-scan
         run: |
-          CHANGED_FOLDERS=(${{ steps.changed-folders.outputs.changed-folders }})
-          if [ -n "$CHANGED_FOLDERS" ]; then
-            for folder in "${CHANGED_FOLDERS[@]}"; do
-              echo "Running KICS scan on folder: $folder"
-              kics scan -p "Modules/$folder"
-              kics scan -p "Resource usage/$folder"
+          CHANGED_MODULES=(${{ steps.changed-modules.outputs.changed-modules }})
+          if [ -n "$CHANGED_MODULES" ]; then
+            for module in "${CHANGED_MODULES[@]}"; do
+              echo "Scanning module: $module"
+              kics scan -p "Modules/$module" || exit 1
             done
           else
-            echo "No changed folders found in the PR."
+            echo "No changed modules found in the PR."
           fi
 
-      # Step 4: Check Terraform format on changed folders
-      - name: Check Terraform format on changed folders
+      # Step 5: Check Terraform format on changed modules
+      - name: Check Terraform format on changed modules
         run: |
-          CHANGED_FOLDERS=(${{ steps.changed-folders.outputs.changed-folders }})
-          if [ -n "$CHANGED_FOLDERS" ]; then
-            for folder in "${CHANGED_FOLDERS[@]}"; do
-              echo "Checking Terraform format in folder: $folder"
-              terraform fmt -check "Modules/$folder" || exit 1
-              terraform fmt -check "Resource usage/$folder" || exit 1
+          CHANGED_MODULES=(${{ steps.changed-modules.outputs.changed-modules }})
+          if [ -n "$CHANGED_MODULES" ]; then
+            for module in "${CHANGED_MODULES[@]}"; do
+              echo "Checking Terraform format in module: $module"
+              terraform fmt -check "Modules/$module" || exit 1
             done
           else
-            echo "No changed folders found in the PR."
+            echo "No changed modules found in the PR."
           fi
-
-      # Step 5: Publish KICS scan and Terraform format check results to PR
-      - name: Publish results to PR
-        if: ${{ always() }}
-        run: |
-          echo "Publishing KICS scan and Terraform format check results to PR"
-          # Logic to publish the results to the PR, e.g., creating PR comments
