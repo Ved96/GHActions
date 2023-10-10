@@ -2,16 +2,16 @@
 variable "cluster_name" {
   description = "Name of the cluste"
   type        = string
-}
-variable "eks_cluster_role_arn" {
+} 
+ variable "eks_cluster_role_arn" {
   description = "ARN of the IAM role that provides permissions for the Kubernetes control plane to make calls to AWS API operations on your behal"
   type        = string
 }
-variable "cluster_enabled_log_types" {
+  variable "cluster_enabled_log_types" {
   description = "A list of the desired control plane logs to enable. For more information, see Amazon EKS Control Plane Logging documentation (https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html)"
   type        = list(string)
 }
-variable "encryption_config" {
+    variable "encryption_config" {
   description = "Configuration block with encryption configuration for the cluster. Only available on Kubernetes 1.13 and above clusters created after March 6, 2020"
   type = list(object({
     encryption_config_resources = list(string) # List of strings with resources to be encrypted
@@ -21,7 +21,7 @@ variable "encryption_config" {
   }))
   default = []
 }
-variable "cluster_endpoint_public_access" {
+   variable "cluster_endpoint_public_access" {
   description = "Indicates whether or not the amazon EKS  public API server"
   type        = bool
 }
