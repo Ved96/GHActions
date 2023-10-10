@@ -1,39 +1,62 @@
-name: Terraform Format Check and KICS Scan
+name: KICS Scan and Terraform Format Check
+
 on:
   pull_request:
-    paths:
-      - 'Modules/**'
-      - 'Resource usage/**'
     types:
       - opened
       - synchronize
+
 jobs:
-  format-and-scan:
+  kics-scan-and-format:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.0.0
-      - name: Check Terraform format
-        id: terraform-fmt
-        run: terraform fmt -check
-        continue-on-error: true  # Allow the workflow to continue even if formatting fails
+
+      # Step 1: Install KICS
       - name: Install KICS
         run: curl -sSfL https://get.kics.io | sh
-      - name: Copy .tfvars files
+
+      # Step 2: Get a list of changed folders in the PR
+      - name: Get changed folders
+        id: changed-folders
         run: |
-          cp -r project-folder/*.tfvars module-folder/
+          CHANGED_FOLDERS=($(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} | grep -E '^(Modules/|Resource usage/)' | cut -d'/' -f 2 | uniq))
+          echo "::set-output name=changed-folders::${CHANGED_FOLDERS[@]}"
+
+      # Step 3: Check KICS scan on changed folders
       - name: Run KICS Scan
         id: kics-scan
-        run: kics scan -p module-folder/
-      - name: Delete .tfvars files
-        if: ${{ steps.kics-scan.outcome == 'success' }}
-        run: rm module-folder/*.tfvars
-      - name: Set PR status to "failure" on Terraform formatting failure
-        if: ${{ steps.terraform-fmt.outcome == 'failure' }}
         run: |
-          echo "Terraform formatting check failed. Please format your Terraform code using 'terraform fmt' and push the changes."
-          exit 1
+          CHANGED_FOLDERS=(${{ steps.changed-folders.outputs.changed-folders }})
+          if [ -n "$CHANGED_FOLDERS" ]; then
+            for folder in "${CHANGED_FOLDERS[@]}"; do
+              echo "Running KICS scan on folder: $folder"
+              kics scan -p "Modules/$folder"
+              kics scan -p "Resource usage/$folder"
+            done
+          else
+            echo "No changed folders found in the PR."
+          fi
+
+      # Step 4: Check Terraform format on changed folders
+      - name: Check Terraform format on changed folders
+        run: |
+          CHANGED_FOLDERS=(${{ steps.changed-folders.outputs.changed-folders }})
+          if [ -n "$CHANGED_FOLDERS" ]; then
+            for folder in "${CHANGED_FOLDERS[@]}"; do
+              echo "Checking Terraform format in folder: $folder"
+              terraform fmt -check "Modules/$folder" || exit 1
+              terraform fmt -check "Resource usage/$folder" || exit 1
+            done
+          else
+            echo "No changed folders found in the PR."
+          fi
+
+      # Step 5: Publish KICS scan and Terraform format check results to PR
+      - name: Publish results to PR
+        if: ${{ always() }}
+        run: |
+          echo "Publishing KICS scan and Terraform format check results to PR"
+          # Logic to publish the results to the PR, e.g., creating PR comments
