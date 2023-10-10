@@ -18,7 +18,7 @@ jobs:
       - name: Install KICS
         run: curl -sSfL https://get.kics.io | sh
 
-      # Step 2: Get a list of all changed folders in the PR
+      # Step 2: Get a list of changed folders in the PR
       - name: Get changed folders
         id: changed-folders
         run: |
@@ -47,8 +47,23 @@ jobs:
             echo "No changed modules found in the PR."
           fi
 
-      # Step 5: Check Terraform format on all changed folders
-      - name: Check Terraform format
+      # Step 5: Run KICS Scan for changed modules
+      - name: Run KICS Scan for changed modules
+        uses: actions/checkout@v3
+      - name: Run KICS Scan
+        run: |
+          CHANGED_MODULES=(${{ steps.changed-modules-and-resource-usage.outputs.changed-modules }})
+          if [ -n "$CHANGED_MODULES" ]; then
+            for module in "${CHANGED_MODULES[@]}"; do
+              echo "Scanning module: $module"
+              kics scan -p "Modules/$module" || exit 1
+            done
+          else
+            echo "No changed modules found in the PR."
+          fi
+
+      # Step 6: Check Terraform format on all changed folders
+      - name: Check Terraform format on all changed folders
         run: |
           CHANGED_FOLDERS=(${{ steps.changed-folders.outputs.changed-folders }})
           if [ -n "$CHANGED_FOLDERS" ]; then
@@ -59,14 +74,3 @@ jobs:
           else
             echo "No changed folders found in the PR."
           fi
-
-      # Step 6: Run KICS Scan for changed modules
-      - name: Run KICS Scan for changed modules
-        uses: checkmarx/kics-github-action@v1.7.0
-        with:
-          path: 'Modules/${{ steps.changed-modules-and-resource-usage.outputs.changed-modules[0] }}'
-          ignore_on_exit: results
-          output_path: myResults/
-      - name: Display KICS results
-        run: |
-          cat myResults/results.json
