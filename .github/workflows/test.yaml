@@ -14,6 +14,7 @@ jobs:
     - uses: Stockopedia/action-get-changed-files@v1.2
       id: get_changed
       with:
+        node-version: '12'
         github-token: ${{ secrets.GITHUB_TOKEN }}
         foldersOnly: true # to only include folders in the output
 
