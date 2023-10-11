@@ -24,6 +24,9 @@ jobs:
           echo "changed_files_folder2=${changed_files_resource}" >> $GITHUB_OUTPUT
 
       - name: Print Changed Files
+        env:
+          changed_files_folder1: ${{ steps.changed-files.outputs.changed_files_folder1}}
+          changed_files_folder2: ${{ steps.changed-files.outputs.changed_files_folder2}}
         run: |
-          echo "Changed files in folder1: ${{ steps.changed-files.outputs.changed_files_folder1 }}"
-          echo "Changed files in folder2: ${{ steps.changed-files.outputs.changed_files_folder2 }}"
+          echo "Changed files in folder1 ${{ steps.changed-files.outputs.changed_files_folder1 }}"
+          echo "Changed files in folder2 ${{ steps.changed-files.outputs.changed_files_folder2 }}"
