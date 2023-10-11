@@ -9,15 +9,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
+      - name: Set Base and PR Branches
+        run: |
+          base_branch="main"  # Set your base branch name here
+          pr_branch="${{ github.event.inputs.pr_branch }}"  # Get the PR branch from the workflow_dispatch input
+          echo "Base Branch: $base_branch"
+          echo "PR Branch: $pr_branch"
       - name: Find Changed Files
         id: changed-files
         run: |
-          base_branch="${{ github.base_ref }}"
-          pr_branch="${{ github.head_ref }}"
-          echo "${{ github.base_ref }}"
           changed_files_module="$(git diff --name-only $base_branch $pr_branch -- 'Modules/')"
-
           changed_files_resource="$(git diff --name-only $base_branch $pr_branch -- 'Resource usage/')"
           echo "changed_files_folder1=${changed_files_module}" >> $GITHUB_OUTPUT
           echo "changed_files_folder2=${changed_files_resource}" >> $GITHUB_OUTPUT
