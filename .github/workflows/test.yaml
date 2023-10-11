@@ -2,6 +2,10 @@ name: Find Changed Files in PR
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'Modules/**'
+      - 'Resource usage/**'
 
 jobs:
   find-changed-files:
@@ -14,19 +18,14 @@ jobs:
       - name: Find Changed Files
         id: changed-files
         run: |
-          base_branch="${{ github.event.pull_request.base.ref }}"
-          pr_branch="${{ github.event.pull_request.head.ref }}"
-          changed_files_module="$(git diff $base_branch $pr_branch -- Modules/)"
-          changed_files_resource="$(git diff $base_branch $pr_branch -- Resource usage/)"
-          echo "changed_files_folder1=${changed_files_folder1}" >> $GITHUB_OUTPUT
-          echo "changed_files_folder2=${changed_files_folder2}" >> $GITHUB_OUTPUT
+          base_branch="${{ github.event.pull_request.base.sha }}"
+          pr_branch="${{ github.event.pull_request.head.sha }}"
+          changed_files_module="$(git diff --name-only $base_branch $pr_branch -- 'Modules/')"
+          changed_files_resource="$(git diff --name-only $base_branch $pr_branch -- 'Resource usage/')"
+          echo "changed_files_folder1=${changed_files_module}" >> $GITHUB_ENV
+          echo "changed_files_folder2=${changed_files_resource}" >> $GITHUB_ENV
 
       - name: Print Changed Files
         run: |
-          echo "Changed files in folder1: $changed_files_module"
-          echo "Changed files in folder2: $changed_files_resource"
-
-      - name: Print Changed Files
-        env:
-          changed_files_folder1: ${{ steps.changed-files.outputs.changed_files_folder1 }}
-        run: echo "$changed_files_folder1"   
+          echo "Changed files in folder1: ${{ steps.changed-files.outputs.changed_files_folder1 }}"
+          echo "Changed files in folder2: ${{ steps.changed-files.outputs.changed_files_folder2 }}"
