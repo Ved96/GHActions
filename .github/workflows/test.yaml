@@ -4,20 +4,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  tfvars-copy-scan:
+  changedfolders:
     runs-on: ubuntu-latest
-
+    outputs:
+      folders: ${{ steps.changes.outputs.folders }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - uses: Stockopedia/action-get-changed-files@v1.2
-      id: get_changed
-      with:
-        node-version: '12'
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        foldersOnly: true # to only include folders in the output
-
-    - name: Echo
-      run: echo ${{ steps.get_changed.outputs.changed }}
-    
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Get changed folders
+        id: changes
+        run: |
+          echo "::set-output name=folders::$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs -I{} dirname {} | sort -u)"
