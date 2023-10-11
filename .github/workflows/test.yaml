@@ -20,8 +20,8 @@ jobs:
           changed_files_module="$(git diff --name-only $base_branch $pr_branch -- 'Modules/')"
           changed_files_resource="$(git diff --name-only $base_branch $pr_branch -- 'Resource usage/')"
 
-          echo "changed_files_folder1=${changed_files_module}" >> $GITHUB_ENV
-          echo "changed_files_folder2=${changed_files_resource}" >> $GITHUB_ENV
+          echo "changed_files_folder1=${changed_files_module}" >> $GITHUB_OUTPUT
+          echo "changed_files_folder2=${changed_files_resource}" >> $GITHUB_OUTPUT
 
       - name: Print Changed Files
         run: |
