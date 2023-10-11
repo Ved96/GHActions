@@ -1,10 +1,7 @@
 name: PR Workflow
 
 on:
-  pull_request:
-    paths:
-      - 'Modules/**'
-      - 'Resource_usage/**'
+  workflow_dispatch:
 
 jobs:
   tfvars-copy-scan:
@@ -14,40 +11,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Get changed folders
-      id: changes
-      run: |
-        CHANGED_FOLDERS=$(git diff --name-only ${{ github.base_ref }}...${{ github.head_ref }} | awk -F/ '{print $1}' | sort -u)
-        echo "::set-output name=changed_folders::${CHANGED_FOLDERS}"
+    - uses: Stockopedia/action-get-changed-files@v1
+      id: get_changed
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        foldersOnly: true # to only include folders in the output
 
-    - name: Copy .tfvars files
-      run: |
-        for folder in ${{ steps.changes.outputs.changed_folders }}; do
-          if [ -d "Resource_usage/${folder}" ] && [ -d "Modules/${folder}" ]; then
-            cp Resource_usage/${folder}/*.tfvars Modules/${folder}/
-          fi
-        done
-
-    - name: Terraform fmt check
-      run: |
-        for folder in ${{ steps.changes.outputs.changed_folders }}; do
-          if [ -d "Modules/${folder}" ]; then
-            cd Modules/${folder}
-            terraform fmt -check
-            cd ../../
-          elif [ -d "Resource_usage/${folder}" ]; then
-            cd Resource_usage/${folder}
-            terraform fmt -check
-            cd ../../
-          fi
-        done
-
-    - name: KICS Scan
-      run: |
-        for folder in ${{ steps.changes.outputs.changed_folders }}; do
-          if [ -d "Modules/${folder}" ]; then
-            cd Modules/${folder}
-            kics scan
-            cd ../../
-          fi
-        done
+    - name: Echo
+      run: echo ${{ steps.get_changed.outputs.changed }}
+    
