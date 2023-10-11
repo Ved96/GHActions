@@ -12,6 +12,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Find Changed Files
+        id: changed files
         run: |
           base_branch="${{ github.event.pull_request.base.ref }}"
           pr_branch="${{ github.event.pull_request.head.ref }}"
@@ -24,3 +25,8 @@ jobs:
         run: |
           echo "Changed files in folder1: $changed_files_module"
           echo "Changed files in folder2: $changed_files_resource"
+
+      - name: Print Changed Files
+        env:
+          changed_files_folder1: ${{ steps.changed files.outputs.changed_files_folder1 }}
+        run: echo "The selected color is $changed_files_folder1"   
