@@ -29,4 +29,4 @@ jobs:
       - name: Print Changed Files
         env:
           changed_files_folder1: ${{ steps.changed-files.outputs.changed_files_folder1 }}
-        run: echo "The selected color is $changed_files_folder1"   
+        run: echo "$changed_files_folder1"   
