@@ -1,20 +1,26 @@
-name: PR Workflow
+name: Find Changed Files in PR
 
 on:
   workflow_dispatch:
 
 jobs:
-  changedfolders:
+  find-changed-files:
     runs-on: ubuntu-latest
-    outputs:
-      folders: ${{ steps.changes.outputs.folders }}
-    steps:
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v17.2
 
-      - name: List all added files
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Find Changed Files
         run: |
-          for file in ${{ steps.changed-files.outputs.added_files }}; do
-          echo "$file was added"
-          done
+          base_branch="${{ github.event.pull_request.base.ref }}"
+          pr_branch="${{ github.event.pull_request.head.ref }}"
+          changed_files_module="$(git diff $base_branch $pr_branch -- Modules/)"
+          changed_files_resource="$(git diff $base_branch $pr_branch -- Resource usage/)"
+          echo "changed_files_folder1=${changed_files_folder1}" >> $GITHUB_OUTPUT
+          echo "changed_files_folder2=${changed_files_folder2}" >> $GITHUB_OUTPUT
+
+      - name: Print Changed Files
+        run: |
+          echo "Changed files in folder1: $changed_files_module"
+          echo "Changed files in folder2: $changed_files_resource"
