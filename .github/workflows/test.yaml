@@ -15,6 +15,7 @@ jobs:
         run: |
           base_branch="${{ github.base_ref }}"
           pr_branch="${{ github.head_ref }}"
+          echo "${{ github.base_ref }}"
           changed_files_module="$(git diff --name-only $base_branch $pr_branch -- 'Modules/')"
 
           changed_files_resource="$(git diff --name-only $base_branch $pr_branch -- 'Resource usage/')"
