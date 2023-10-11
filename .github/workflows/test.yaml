@@ -1,26 +1,41 @@
-name: Find Changed Files in PR
+name: Find Changed Folders
 
 on:
-  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'Modules/**'
+      - 'Resource Usage/**'
 
 jobs:
-  find-changed-files:
+  find-changed-folders:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Check Out Code
         uses: actions/checkout@v2
 
-      - name: Find Changed Files
+      - name: Find Changed Folders in Modules
+        id: changed_folders_modules
         run: |
-          base_branch="${{ github.event.pull_request.base.ref }}"
-          pr_branch="${{ github.event.pull_request.head.ref }}"
-          changed_files_module="$(git diff $base_branch $pr_branch -- Modules/)"
-          changed_files_resource="$(git diff $base_branch $pr_branch -- Resource usage/)"
-          echo "changed_files_folder1=${changed_files_folder1}" >> $GITHUB_OUTPUT
-          echo "changed_files_folder2=${changed_files_folder2}" >> $GITHUB_OUTPUT
+          base_commit=$(git merge-base HEAD ${{ github.base_ref }})
+          changed_folders_modules=$(git diff --name-only $base_commit HEAD -- 'Modules/')
+          echo "changed_folders_modules=${changed_folders_modules}" >> $GITHUB_OUTPUT
 
-      - name: Print Changed Files
+      - name: Find Changed Folders in Resource Usage
+        id: changed_folders_resource
         run: |
-          echo "Changed files in folder1: $changed_files_module"
-          echo "Changed files in folder2: $changed_files_resource"
+          base_commit=$(git merge-base HEAD ${{ github.base_ref }})
+          changed_folders_resource=$(git diff --name-only $base_commit HEAD -- 'Resource Usage/')
+          echo "changed_folders_resource=${changed_folders_resource}" >> $GITHUB_OUTPUT
+
+      - name: Display Changed Folders in Modules
+        run: |
+          changed_folders_modules="${{ steps.changed_folders_modules.outputs.changed_folders_modules }}"
+          echo "Changed folders in 'Modules/':"
+          echo "$changed_folders_modules"
+
+      - name: Display Changed Folders in Resource Usage
+        run: |
+          changed_folders_resource="${{ steps.changed_folders_resource.outputs.changed_folders_resource }}"
+          echo "Changed folders in 'Resource Usage/':"
+          echo "$changed_folders_resource"
