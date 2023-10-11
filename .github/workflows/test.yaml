@@ -1,10 +1,7 @@
 name: Find Changed Folders
 
 on:
-  pull_request:
-    paths:
-      - 'Modules/**'
-      - 'Resource Usage/**'
+  workflow_dispatch:
 
 jobs:
   find-changed-folders:
