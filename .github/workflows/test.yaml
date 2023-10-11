@@ -1,7 +1,6 @@
 name: Find Changed Files in PR
 
 on:
-  workflow_dispatch:
   pull_request:
     paths:
       - 'Modules/**'
@@ -18,10 +17,15 @@ jobs:
       - name: Find Changed Files
         id: changed-files
         run: |
+          # Use the predefined variables for base and pull request branches
           base_branch="${{ github.event.pull_request.base.sha }}"
           pr_branch="${{ github.event.pull_request.head.sha }}"
+
+          # Use the corrected git diff command
           changed_files_module="$(git diff --name-only $base_branch $pr_branch -- 'Modules/')"
           changed_files_resource="$(git diff --name-only $base_branch $pr_branch -- 'Resource usage/')"
+
+          # Set environment variables using $GITHUB_ENV
           echo "changed_files_folder1=${changed_files_module}" >> $GITHUB_ENV
           echo "changed_files_folder2=${changed_files_resource}" >> $GITHUB_ENV
 
