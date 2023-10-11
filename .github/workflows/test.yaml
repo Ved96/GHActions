@@ -11,8 +11,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Set Base and PR Branches
         run: |
-          base_branch="main"  # Set your base branch name here
-          pr_branch="${{ github.event.inputs.pr_branch }}"  # Get the PR branch from the workflow_dispatch input
+          base_branch="${{ github.base_ref }}" >> $GITHUB_OUTPUT
+          pr_branch="${{ github.head_ref }}" >> $GITHUB_OUTPUT
           echo "Base Branch: $base_branch"
           echo "PR Branch: $pr_branch"
       - name: Find Changed Files
