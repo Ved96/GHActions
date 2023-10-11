@@ -9,9 +9,12 @@ jobs:
     outputs:
       folders: ${{ steps.changes.outputs.folders }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Get changed folders
-        id: changes
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v17.2
+
+      - name: List all added files
         run: |
-          echo "::set-output name=folders::$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs -I{} dirname {} | sort -u)"
+          for file in ${{ steps.changed-files.outputs.added_files }}; do
+          echo "$file was added"
+          done
