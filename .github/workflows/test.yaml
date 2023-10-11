@@ -15,7 +15,7 @@ jobs:
         id: changed-files
         run: |
           # Use the predefined variables for base and pull request branches
-          base_branch="${{ github.event.pull_request.base.sha }}"
+          base_branch="${{ github.event.workflow_run.head_sha }}"
           pr_branch="${{ github.event.pull_request.head.sha }}"
 
           # Use the corrected git diff command
