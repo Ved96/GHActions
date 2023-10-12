@@ -13,11 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
           
-      - name: Find Changed Files
-        id: changed-files
-        working-directory: /home/runner/work/GHActions/GHActions
-        run: |
-          changed_files_module= git --no-pager diff --name-only --diff-filter=ACMRT ${{github.event.pull_request.base.sha}} ${{ github.event.pull_request.head.sha }}
-          changed_files_resource= git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} -- 'Resource usage/'
-          echo $changed_files_module
-          echo $changed_files_resource
+      - uses: Stockopedia/action-get-changed-files@v1
+        id: get_changed
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          ignore: "**/*.js" # glob
+          foldersOnly: true # to only include folders in the output
+          format: json # either json, csv or newline
+      - name: Echo
+        run: echo ${{ steps.get_changed.outputs.changed }}
