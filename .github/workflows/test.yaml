@@ -10,7 +10,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Set Base and PR Branches
-        working-directory: ./
+        working-directory: /home/runner/work/GHActions/GHActions
         run: |
           base_branch="${{ github.base_ref }}" >> $GITHUB_OUTPUT
           pr_branch="${{ github.head_ref }}" >> $GITHUB_OUTPUT
