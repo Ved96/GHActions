@@ -17,7 +17,7 @@ jobs:
         id: changed-files
         working-directory: /home/runner/work/GHActions/GHActions
         run: |
-          changed_files_module=`git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} -- 'Modules/'`
-          changed_files_resource=`git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} -- 'Resource usage/'`
+          changed_files_module= git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} -- 'Modules/'
+          changed_files_resource= git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} -- 'Resource usage/'
           echo $changed_files_module
           echo $changed_files_resource
