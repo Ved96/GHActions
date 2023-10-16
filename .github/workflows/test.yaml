@@ -15,14 +15,13 @@ jobs:
       - name: Authenticate with GitHub CLI
         run: gh auth login
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}    
+          GH_TOKEN: ${{ secrets.GITACTIONS }}    
       - name: Find Changed Files
         id: changed-files
         env:
           PR_NUMBER: ${{ github.event.number }}
         run: |
           echo $PR_NUMBER
-          gh auth login --with-token <<< ${{ secrets.GITACTIONS }}
           files = `gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/Ved96/GHActions/pulls/$PR_NUMBER/files`
 
           
