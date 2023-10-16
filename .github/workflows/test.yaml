@@ -23,6 +23,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}  
         run: |
           git branch
+          chmod +x .github/workflows/test.yaml
           changed_files_module= `gh pr view $PR_NUMBER --json files --jq '.files.[].path'`
           echo $changed_files_module
 
