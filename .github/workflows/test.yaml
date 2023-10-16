@@ -12,9 +12,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
           
       - name: Find Changed Files
         id: changed-files
@@ -22,7 +19,6 @@ jobs:
           PR_NUMBER: ${{ github.event.number }}
           GH_TOKEN: ${{ github.token }}  
         run: |
-          git branch
           echo $PR_NUMBER
           changed_files_module= `gh pr view $PR_NUMBER --json files --jq '.files.[].path'`
           echo $changed_files_module
