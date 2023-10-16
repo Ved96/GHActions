@@ -22,6 +22,7 @@ jobs:
           TARGET_BRANCH: ${{ github.head_ref }}
         run: |
           echo $PR_NUMBER
+          git checkout $TARGET_BRANCH
           changed_files = `git diff --name-only $SOURCE_BRANCH $TARGET_BRANCH -- 'Modules'`
           changed_files_module= `gh pr view $PR_NUMBER --json files --jq '.files.[].path'`
           echo $changed_files_module
