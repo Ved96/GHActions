@@ -14,7 +14,7 @@ jobs:
         id: changed-files
         working-directory: /home/runner/work/GHActions/GHActions
         run: |
-          echo $(git branch)
+          git branch
           changed_files_module=`git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD main)`
           changed_files_resource=`git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} -- 'Resource usage/'`
           echo $changed_files_module
