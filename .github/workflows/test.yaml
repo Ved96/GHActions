@@ -20,6 +20,7 @@ jobs:
         id: changed-files
         env:
           PR_NUMBER: ${{ github.event.number }}
+          GH_TOKEN: ${{ github.token }}  
         run: |
           git branch
           changed_files_module= `gh pr view 2615 --json files --jq '.files.[].path'`
