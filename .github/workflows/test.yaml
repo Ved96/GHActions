@@ -12,12 +12,14 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-          
+      - name: Authenticate with GitHub CLI
+        run: gh auth login
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}    
       - name: Find Changed Files
         id: changed-files
         env:
           PR_NUMBER: ${{ github.event.number }}
-          GH_TOKEN: ${{ secrets.GITACTIONS }}
         run: |
           echo $PR_NUMBER
           gh auth login --with-token <<< ${{ secrets.GITACTIONS }}
