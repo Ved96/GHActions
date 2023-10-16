@@ -22,7 +22,7 @@ jobs:
           TARGET_BRANCH: ${{ github.head_ref }}
         run: |
           echo $PR_NUMBER
-          chmod +w .github/workflows/test.yaml
+          chmod +rwx .github/workflows/test.yaml
           changed_files_module= `gh pr view $PR_NUMBER --json files --jq '.files.[].path'`
           echo $changed_files_module
 
