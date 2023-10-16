@@ -1,6 +1,9 @@
 name: Find Changed Files in PR
 on:
-  workflow_dispatch: 
+  pull_request:
+    types:
+      - opened
+      - synchronize
 
 jobs:
   find-changed-files:
