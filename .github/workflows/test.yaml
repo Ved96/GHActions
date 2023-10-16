@@ -23,7 +23,9 @@ jobs:
         run: |
           echo $PR_NUMBER
           chmod +rwx .github/workflows/test.yaml
-          changed_files_module= `gh pr view $PR_NUMBER --json files --jq '.files.[].path'`
-          echo $changed_files_module
+          gh api \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          /repos/OWNER/REPO/pulls/$PR_NUMBER/files
 
           
