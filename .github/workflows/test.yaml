@@ -17,7 +17,7 @@ jobs:
         id: changed-files
         env:
           PR_NUMBER: ${{ github.event.number }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITACTIONS }}
         run: |
           echo $PR_NUMBER
           gh auth login --with-token <<< ${{ secrets.GITACTIONS }}
