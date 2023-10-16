@@ -23,7 +23,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}  
         run: |
           git branch
-          changed_files_module= `gh pr view 2615 --json files --jq '.files.[].path'`
+          changed_files_module= `gh pr view $PR_NUMBER --json files --jq '.files.[].path'`
           echo $changed_files_module
 
           
