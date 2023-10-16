@@ -18,10 +18,11 @@ jobs:
           
       - name: Find Changed Files
         id: changed-files
-        working-directory: /home/runner/work/GHActions/GHActions
+        env:
+          PR_NUMBER: ${{ github.event.number }}
         run: |
           git branch
-          changed_files_module=`git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master)`
+          changed_files_module= `gh pr view 2615 --json files --jq '.files.[].path'`
           echo $changed_files_module
 
           
