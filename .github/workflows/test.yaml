@@ -20,6 +20,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           echo $PR_NUMBER
-          files = `gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/OWNER/REPO/pulls/$PR_NUMBER/files`
+          gh auth login --with-token <<< ${{ secrets.GITACTIONS }}
+          files = `gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/Ved96/GHActions/pulls/$PR_NUMBER/files`
 
           
